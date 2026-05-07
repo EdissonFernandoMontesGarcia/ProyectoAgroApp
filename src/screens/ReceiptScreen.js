@@ -49,6 +49,13 @@ export default function ReceiptScreen({ navigation, route, currency }) {
         >
           <Text style={styles.buttonText}>Seguir comprando</Text>
         </Pressable>
+
+        <Pressable
+          style={[styles.button, styles.ratingButton]}
+          onPress={() => navigation.navigate("Calificacion", { receipt })}
+        >
+          <Text style={styles.buttonText}>Calificar compra</Text>
+        </Pressable>
       </View>
     </ImageBackground>
   );
@@ -98,6 +105,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#7cd4d7",
+  },
+  ratingButton: {
+    backgroundColor: "#4aaeaf",
   },
   buttonText: {
     color: "#0f3f4f",

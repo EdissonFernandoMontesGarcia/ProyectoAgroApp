@@ -1,5 +1,7 @@
+require("dotenv").config({ path: require("path").join(__dirname, "..", ".env") });
 const express = require("express");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
+const crypto = require("crypto");
 
 const app = express();
 app.use(express.json());
@@ -10,6 +12,8 @@ const DB_NAME = process.env.LOCAL_MONGO_DB || "AgroApp";
 const USERS_COLLECTION = process.env.LOCAL_MONGO_USERS_COLLECTION || "usuarios";
 
 let usersCollection;
+let productsCollection;
+let ratingsCollection;
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "agroapp-local-mongo-api" });
@@ -128,12 +132,152 @@ app.put("/api/users/password", async (req, res) => {
   }
 });
 
+app.post("/api/products", async (req, res) => {
+  if (!productsCollection) {
+    return res.status(503).json({ message: "MongoDB no inicializado" });
+  }
+
+  const { nombre, descripcion, cantidad, estado, vendedor, createdAt } = req.body || {};
+
+  if (!nombre) {
+    return res.status(400).json({ message: "nombre es obligatorio" });
+  }
+
+  try {
+    const doc = {
+      nombre: String(nombre).trim(),
+      descripcion: String(descripcion || "").trim(),
+      cantidad: Number(cantidad) || 1,
+      estado: estado || "Activo",
+      vendedor: String(vendedor || "").trim().toLowerCase(),
+      createdAt: createdAt ? new Date(createdAt) : new Date(),
+    };
+
+    const result = await productsCollection.insertOne(doc);
+    return res.status(201).json({ insertedId: result.insertedId.toString() });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+app.get("/api/products", async (req, res) => {
+  if (!productsCollection) {
+    return res.status(503).json({ message: "MongoDB no inicializado" });
+  }
+
+  const { vendedor } = req.query;
+
+  try {
+    const query = vendedor ? { vendedor: String(vendedor).trim().toLowerCase() } : {};
+    const docs = await productsCollection.find(query).sort({ createdAt: -1 }).toArray();
+    const result = docs.map((d) => ({ ...d, _id: d._id.toString() }));
+    return res.json({ products: result });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+app.put("/api/products/:id", async (req, res) => {
+  if (!productsCollection) {
+    return res.status(503).json({ message: "MongoDB no inicializado" });
+  }
+
+  const { id } = req.params;
+  const { nombre, descripcion, cantidad, estado } = req.body || {};
+
+  try {
+    const update = { updatedAt: new Date() };
+    if (nombre !== undefined) update.nombre = String(nombre).trim();
+    if (descripcion !== undefined) update.descripcion = String(descripcion).trim();
+    if (cantidad !== undefined) update.cantidad = Number(cantidad);
+    if (estado !== undefined) update.estado = estado;
+
+    await productsCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: update }
+    );
+
+    return res.json({ updated: true });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+// ── Wompi: firma de integridad ────────────────────────────────────────────────
+app.post("/api/wompi/signature", (req, res) => {
+  const secret = process.env.WOMPI_INTEGRITY_SECRET || "";
+  if (!secret) {
+    return res.status(500).json({ error: "WOMPI_INTEGRITY_SECRET no configurado en .env" });
+  }
+
+  const { reference, amountInCents, currency, expirationTime } = req.body || {};
+  if (!reference || !amountInCents || !currency) {
+    return res.status(400).json({ error: "Faltan campos: reference, amountInCents, currency" });
+  }
+
+  let str = `${reference}${amountInCents}${currency}`;
+  if (expirationTime) str += expirationTime;
+  str += secret;
+
+  const signature = crypto.createHash("sha256").update(str).digest("hex");
+  return res.json({ signature });
+});
+
+// ── Calificaciones ───────────────────────────────────────────────────────────
+app.post("/api/ratings", async (req, res) => {
+  if (!ratingsCollection) {
+    return res.status(503).json({ message: "MongoDB no inicializado" });
+  }
+
+  const { facturaId, usuario, fechaCalificacion, calificaciones } = req.body || {};
+  if (!calificaciones) {
+    return res.status(400).json({ message: "Faltan calificaciones" });
+  }
+
+  try {
+    const doc = {
+      facturaId: String(facturaId || ""),
+      usuario: String(usuario || "").trim().toLowerCase(),
+      fechaCalificacion: fechaCalificacion ? new Date(fechaCalificacion) : new Date(),
+      calificaciones: {
+        experienciaGeneral: Number(calificaciones.experienciaGeneral || 0),
+        calidadProducto: Number(calificaciones.calidadProducto || 0),
+        relacionPrecioCalidad: Number(calificaciones.relacionPrecioCalidad || 0),
+        tiempoRespuesta: Number(calificaciones.tiempoRespuesta || 0),
+        mejorar: String(calificaciones.mejorar || "No"),
+      },
+      createdAt: new Date(),
+    };
+
+    const result = await ratingsCollection.insertOne(doc);
+    return res.status(201).json({ ok: true, insertedId: result.insertedId.toString() });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+app.get("/api/ratings", async (req, res) => {
+  if (!ratingsCollection) {
+    return res.status(503).json({ message: "MongoDB no inicializado" });
+  }
+  const { usuario } = req.query;
+  try {
+    const query = usuario ? { usuario: String(usuario).trim().toLowerCase() } : {};
+    const docs = await ratingsCollection.find(query).sort({ createdAt: -1 }).toArray();
+    return res.json({ ratings: docs.map((d) => ({ ...d, _id: d._id.toString() })) });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
 async function start() {
   const client = new MongoClient(MONGO_URI);
   await client.connect();
 
   const db = client.db(DB_NAME);
   usersCollection = db.collection(USERS_COLLECTION);
+  productsCollection = db.collection("productos");
+  ratingsCollection = db.collection("calificaciones");
 
   app.listen(PORT, () => {
     console.log(`Local Mongo API en http://localhost:${PORT}`);

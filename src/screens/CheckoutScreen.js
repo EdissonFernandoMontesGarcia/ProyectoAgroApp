@@ -19,6 +19,7 @@ export default function CheckoutScreen({
   onIncrease,
   onDecrease,
   onPay,
+  user,
 }) {
   const [selectedPayment, setSelectedPayment] = useState("Tarjeta");
   const [busy, setBusy] = useState(false);
@@ -35,6 +36,24 @@ export default function CheckoutScreen({
     const receipt = await onPay(selectedPayment);
     setBusy(false);
     navigation.replace("Recibo", { receipt });
+  };
+
+  const handleWompiPay = () => {
+    if (!cart.length) return;
+    const reference = `AGRO-${Date.now()}`;
+    const amountInCents = total * 100;
+    navigation.navigate("WompiWebView", {
+      amountInCents,
+      reference,
+      customerData: {
+        email: user?.email || "",
+        fullName: `${user?.nombre || ""} ${user?.apellidos || ""}`.trim(),
+        phoneNumber: user?.celular || "",
+        address: user?.direccion || "",
+        city: user?.ciudad || "",
+        region: user?.departamento || "",
+      },
+    });
   };
 
   return (
@@ -115,14 +134,19 @@ export default function CheckoutScreen({
         </View>
 
         <Pressable
-          style={[
-            styles.payButton,
-            (!cart.length || busy) && styles.payButtonDisabled,
-          ]}
+          style={[styles.payButton, (!cart.length || busy) && styles.payButtonDisabled]}
           onPress={handlePay}
           disabled={!cart.length || busy}
         >
-          <Text style={styles.payText}>{busy ? "Procesando..." : "Pagar"}</Text>
+          <Text style={styles.payText}>{busy ? "Procesando..." : "Pagar (demo)"}</Text>
+        </Pressable>
+
+        <Pressable
+          style={[styles.wompiButton, !cart.length && styles.payButtonDisabled]}
+          onPress={handleWompiPay}
+          disabled={!cart.length}
+        >
+          <Text style={styles.wompiButtonText}>Pagar con Wompi</Text>
         </Pressable>
       </View>
     </ImageBackground>
@@ -266,5 +290,19 @@ const styles = StyleSheet.create({
     color: "#0f3f4f",
     fontWeight: "700",
     fontSize: 12,
+  },
+  wompiButton: {
+    marginTop: 8,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f9a825",
+  },
+  wompiButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+    letterSpacing: 0.3,
   },
 });

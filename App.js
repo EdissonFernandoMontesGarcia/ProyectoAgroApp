@@ -8,10 +8,14 @@ import ProductsScreen from "./src/screens/ProductsScreen";
 import CheckoutScreen from "./src/screens/CheckoutScreen";
 import ReceiptScreen from "./src/screens/ReceiptScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
+import CreateProductScreen from "./src/screens/CreateProductScreen";
+import EditProductScreen from "./src/screens/EditProductScreen";
+import WompiWebViewScreen from "./src/screens/WompiWebViewScreen";
+import RatingScreen from "./src/screens/RatingScreen";
 import { products } from "./src/data/products";
 import { mockUser } from "./src/data/mockUser";
 import { ENV } from "./src/config/env";
-import { saveOrderToMongo, saveUserToMongo, loginFromMongo } from "./src/services/mongoService";
+import { saveOrderToMongo, saveUserToMongo, loginFromMongo, saveProductToMongo } from "./src/services/mongoService";
 
 const Stack = createNativeStackNavigator();
 
@@ -82,6 +86,54 @@ export default function App() {
         )
         .filter((item) => item.cantidad > 0)
     );
+  };
+
+  const handleSaveProduct = async (product) => {
+    return await saveProductToMongo(product);
+  };
+
+  const handleWompiPayComplete = async (transactionId, status, reference, amountInCents) => {
+    const total = Math.round(amountInCents / 100);
+    const now = new Date();
+    const order = {
+      usuario: {
+        nombre: user?.nombre || "Cliente",
+        apellidos: user?.apellidos || "",
+        email: user?.email || "",
+        celular: user?.celular || "",
+        ciudad: user?.ciudad || "",
+        direccion: user?.direccion || "",
+        tipoUsuario: user?.tipoUsuario || "cliente",
+      },
+      productos: cart.map((item) => ({
+        id: item.id,
+        nombre: item.nombre,
+        precio: item.precio,
+        cantidad: item.cantidad,
+      })),
+      subtotal,
+      domicilio: ENV.DELIVERY_FEE,
+      total,
+      paymentMethod: "Wompi",
+      wompiTransactionId: transactionId,
+      wompiReference: reference,
+      status: "Aprobada",
+      createdAt: now.toISOString(),
+    };
+
+    const mongoResult = await saveOrderToMongo(order);
+    setCart([]);
+
+    return {
+      receiptCode: reference,
+      paymentMethod: "Wompi",
+      status: "Aprobada",
+      dateText: now.toLocaleString("es-CO"),
+      total,
+      mongoStatus: mongoResult.saved
+        ? `Orden guardada (Tx: ${transactionId})`
+        : "Orden guardada localmente",
+    };
   };
 
   const handlePay = async (paymentMethod) => {
@@ -175,11 +227,35 @@ export default function App() {
               onIncrease={increaseQty}
               onDecrease={decreaseQty}
               onPay={handlePay}
+              user={user}
             />
           )}
         </Stack.Screen>
         <Stack.Screen name="Recibo" options={{ title: "Comprobante" }}>
           {(props) => <ReceiptScreen {...props} currency={ENV.CURRENCY} />}
+        </Stack.Screen>
+        <Stack.Screen name="CrearProducto" options={{ title: "Crear Producto" }}>
+          {(props) => (
+            <CreateProductScreen
+              {...props}
+              user={user}
+              onSaveProduct={handleSaveProduct}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="EditarProducto" options={{ title: "Editor de Producto" }}>
+          {(props) => <EditProductScreen {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name="WompiWebView" options={{ title: "Pagar con Wompi" }}>
+          {(props) => (
+            <WompiWebViewScreen
+              {...props}
+              onPayComplete={handleWompiPayComplete}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="Calificacion" options={{ title: "Calificación" }}>
+          {(props) => <RatingScreen {...props} user={user} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
