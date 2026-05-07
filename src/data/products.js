@@ -1,0 +1,51 @@
+export const products = [
+  {
+    id: "1",
+    nombre: "Cafe de origen",
+    precio: 24000,
+    unidad: "bolsa",
+    image: require("../../assets/Cafe.png"),
+  },
+  {
+    id: "2",
+    nombre: "Platano verde",
+    precio: 3900,
+    unidad: "unidad",
+    image: require("../../assets/PlatanoVerde.png"),
+  },
+  {
+    id: "3",
+    nombre: "Papa criolla",
+    precio: 5200,
+    unidad: "kg",
+    image: require("../../assets/Papa.png"),
+  },
+  {
+    id: "4",
+    nombre: "Tomate chonto",
+    precio: 4500,
+    unidad: "kg",
+    image: require("../../assets/Tomate.png"),
+  },
+  {
+    id: "5",
+    nombre: "Naranja",
+    precio: 4200,
+    unidad: "kg",
+    image: require("../../assets/Naranja.png"),
+  },
+  {
+    id: "6",
+    nombre: "Yuca",
+    precio: 2800,
+    unidad: "kg",
+    image: require("../../assets/Yuca.png"),
+  },
+  {
+    id: "7",
+    nombre: "Manzana",
+    precio: 7000,
+    unidad: "kg",
+    image: require("../../assets/Manzana.png"),
+  },
+];
