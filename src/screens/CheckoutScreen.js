@@ -18,25 +18,16 @@ export default function CheckoutScreen({
   deliveryFee,
   onIncrease,
   onDecrease,
-  onPay,
+  onRemove,
   user,
 }) {
   const [selectedPayment, setSelectedPayment] = useState("Tarjeta");
-  const [busy, setBusy] = useState(false);
 
   const subtotal = useMemo(
     () => cart.reduce((acc, item) => acc + item.precio * item.cantidad, 0),
     [cart]
   );
   const total = subtotal + deliveryFee;
-
-  const handlePay = async () => {
-    if (!cart.length) return;
-    setBusy(true);
-    const receipt = await onPay(selectedPayment);
-    setBusy(false);
-    navigation.replace("Recibo", { receipt });
-  };
 
   const handleWompiPay = () => {
     if (!cart.length) return;
@@ -116,6 +107,12 @@ export default function CheckoutScreen({
                 >
                   <Text style={styles.qtyBtnText}>+</Text>
                 </Pressable>
+                <Pressable
+                  onPress={() => onRemove(item.id)}
+                  style={styles.removeBtn}
+                >
+                  <Text style={styles.removeBtnText}>✕</Text>
+                </Pressable>
               </View>
             </View>
           )}
@@ -132,14 +129,6 @@ export default function CheckoutScreen({
             Total: {formatCurrency(total, currency)}
           </Text>
         </View>
-
-        <Pressable
-          style={[styles.payButton, (!cart.length || busy) && styles.payButtonDisabled]}
-          onPress={handlePay}
-          disabled={!cart.length || busy}
-        >
-          <Text style={styles.payText}>{busy ? "Procesando..." : "Pagar (demo)"}</Text>
-        </Pressable>
 
         <Pressable
           style={[styles.wompiButton, !cart.length && styles.payButtonDisabled]}
@@ -253,6 +242,20 @@ const styles = StyleSheet.create({
   qtyValue: {
     minWidth: 18,
     textAlign: "center",
+    fontWeight: "700",
+    fontSize: 11,
+  },
+  removeBtn: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#e05252",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 4,
+  },
+  removeBtnText: {
+    color: "#fff",
     fontWeight: "700",
     fontSize: 11,
   },

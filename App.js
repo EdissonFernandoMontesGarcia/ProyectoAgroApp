@@ -88,6 +88,10 @@ export default function App() {
     );
   };
 
+  const removeFromCart = (productId) => {
+    setCart((prev) => prev.filter((item) => item.id !== productId));
+  };
+
   const handleSaveProduct = async (product) => {
     return await saveProductToMongo(product);
   };
@@ -226,6 +230,7 @@ export default function App() {
               deliveryFee={ENV.DELIVERY_FEE}
               onIncrease={increaseQty}
               onDecrease={decreaseQty}
+              onRemove={removeFromCart}
               onPay={handlePay}
               user={user}
             />

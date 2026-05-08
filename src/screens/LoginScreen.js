@@ -179,8 +179,8 @@ const styles = StyleSheet.create({
   footerText: {
     color: "#fff",
     textAlign: "center",
-    fontSize: 9,
-    lineHeight: 13,
+    fontSize: 24,
+    lineHeight: 30,
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowRadius: 3,
     textShadowOffset: { width: 0, height: 1 },
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   footerCopy: {
     color: "#fff",
     textAlign: "center",
-    fontSize: 9,
+    fontSize: 24,
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowRadius: 3,
     textShadowOffset: { width: 0, height: 1 },
