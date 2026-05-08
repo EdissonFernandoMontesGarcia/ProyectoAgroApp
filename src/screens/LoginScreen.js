@@ -10,11 +10,13 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Feather } from "@expo/vector-icons";
 
 export default function LoginScreen({ navigation, onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -50,16 +52,30 @@ export default function LoginScreen({ navigation, onLogin }) {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
+          spellCheck={false}
         />
 
-        <TextInput
-          placeholder="Contraseña"
-          placeholderTextColor="#6f6f6f"
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            placeholder="Contraseña"
+            placeholderTextColor="#6f6f6f"
+            style={styles.passwordInput}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          <Pressable
+            style={styles.eyeButton}
+            onPress={() => setShowPassword((v) => !v)}
+          >
+            <Feather
+              name={showPassword ? "eye" : "eye-off"}
+              size={22}
+              color="#6f6f6f"
+            />
+          </Pressable>
+        </View>
 
         <Pressable
           style={[styles.primaryButton, loading && { opacity: 0.6 }]}
@@ -71,7 +87,9 @@ export default function LoginScreen({ navigation, onLogin }) {
           </Text>
         </Pressable>
 
-        <Text style={styles.recoverText}>Recuperar Contraseña</Text>
+        <Pressable onPress={() => navigation.navigate("RecuperarContrasena")}>
+          <Text style={styles.recoverText}>Recuperar Contraseña</Text>
+        </Pressable>
         <View style={styles.separatorLine} />
 
         <Pressable
@@ -171,6 +189,30 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 14,
   },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#d8d8d8",
+    borderRadius: 14,
+    backgroundColor: "#f0f0f0",
+    marginBottom: 20,
+    height: 58,
+    paddingHorizontal: 22,
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 14,
+    height: "100%",
+  },
+  eyeButton: {
+    paddingLeft: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  eyeIcon: {
+    fontSize: 20,
+  }, // unused – kept for safety
   footerContainer: {
     marginTop: "auto",
     marginBottom: 30,
@@ -179,8 +221,8 @@ const styles = StyleSheet.create({
   footerText: {
     color: "#fff",
     textAlign: "center",
-    fontSize: 24,
-    lineHeight: 30,
+    fontSize: 13,
+    lineHeight: 18,
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowRadius: 3,
     textShadowOffset: { width: 0, height: 1 },
@@ -188,7 +230,7 @@ const styles = StyleSheet.create({
   footerCopy: {
     color: "#fff",
     textAlign: "center",
-    fontSize: 24,
+    fontSize: 13,
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowRadius: 3,
     textShadowOffset: { width: 0, height: 1 },

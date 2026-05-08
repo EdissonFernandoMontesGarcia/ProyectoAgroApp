@@ -309,3 +309,20 @@ export async function saveOrderToMongo(order) {
     return { saved: false, reason: error.message };
   }
 }
+
+export async function resetPasswordInMongo(email, newPassword) {
+  const baseUrl = normalizeLocalBaseUrl(ENV.LOCAL_API_BASE_URL);
+  if (!baseUrl) return { ok: false, reason: "API local no configurada" };
+  try {
+    const response = await fetch(`${baseUrl}/api/users/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim().toLowerCase(), newPassword }),
+    });
+    const data = await response.json();
+    if (!response.ok) return { ok: false, reason: data.message || "Error al restablecer" };
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, reason: error.message };
+  }
+}

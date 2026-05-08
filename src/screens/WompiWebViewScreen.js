@@ -3,11 +3,11 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import { ENV } from "../config/env";
 import { getWompiSignature, verifyWompiTransaction } from "../services/mongoService";
@@ -179,7 +179,12 @@ export default function WompiWebViewScreen({ navigation, route }) {
       <WebView
         source={{ uri: checkoutUrl }}
         style={styles.webview}
+        originWhitelist={["*"]}
         onNavigationStateChange={handleNavigationChange}
+        onShouldStartLoadWithRequest={(request) => {
+          if (request.url === "about:srcdoc" || request.url === "about:blank") return false;
+          return true;
+        }}
         javaScriptEnabled
         domStorageEnabled
         startInLoadingState

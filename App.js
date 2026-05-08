@@ -12,6 +12,7 @@ import CreateProductScreen from "./src/screens/CreateProductScreen";
 import EditProductScreen from "./src/screens/EditProductScreen";
 import WompiWebViewScreen from "./src/screens/WompiWebViewScreen";
 import RatingScreen from "./src/screens/RatingScreen";
+import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
 import { products } from "./src/data/products";
 import { mockUser } from "./src/data/mockUser";
 import { ENV } from "./src/config/env";
@@ -90,6 +91,11 @@ export default function App() {
 
   const removeFromCart = (productId) => {
     setCart((prev) => prev.filter((item) => item.id !== productId));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setCart([]);
   };
 
   const handleSaveProduct = async (product) => {
@@ -206,8 +212,11 @@ export default function App() {
             <RegisterScreen {...props} onRegister={handleRegister} />
           )}
         </Stack.Screen>
+        <Stack.Screen name="RecuperarContrasena" options={{ title: "Recuperar Contraseña" }}>
+          {(props) => <ForgotPasswordScreen {...props} />}
+        </Stack.Screen>
         <Stack.Screen name="Perfil" options={{ title: "Perfil" }}>
-          {(props) => <ProfileScreen {...props} user={user} />}
+          {(props) => <ProfileScreen {...props} user={user} onLogout={handleLogout} />}
         </Stack.Screen>
         <Stack.Screen name="Productos" options={{ title: "Productos" }}>
           {(props) => (

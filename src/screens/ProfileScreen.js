@@ -10,9 +10,10 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { changePasswordInMongo } from "../services/mongoService";
 
-export default function ProfileScreen({ navigation, user }) {
+export default function ProfileScreen({ navigation, user, onLogout }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [currentPwd, setCurrentPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
@@ -42,79 +43,98 @@ export default function ProfileScreen({ navigation, user }) {
     }
   };
 
+  const tipoLabel = user?.tipoUsuario
+    ? user.tipoUsuario.charAt(0).toUpperCase() + user.tipoUsuario.slice(1)
+    : "—";
+
+  const FIELDS = [
+    { label: "Nombres",      value: user?.nombre },
+    { label: "Apellidos",    value: user?.apellidos },
+    { label: "Email",        value: user?.email },
+    { label: "Celular",      value: user?.celular },
+    { label: "Departamento", value: user?.departamento },
+    { label: "Ciudad",       value: user?.ciudad },
+    { label: "Dirección",    value: user?.direccion },
+    { label: "Perfil",       value: tipoLabel },
+  ];
+
   return (
     <ImageBackground
-      source={require("../../assets/AgroAPP_Fondo_Pantalla.png")}
+      source={require("../../assets/Frutas_Fondo_Atardecer.png")}
       style={styles.container}
       resizeMode="cover"
     >
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <Pressable
-          style={styles.productsButton}
-          onPress={() => navigation.navigate("Productos")}
+      <View style={styles.dimOverlay} />
+      <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.productsButtonText}>Ir a{"\n"}Productos</Text>
-        </Pressable>
+          {/* Avatar */}
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarIcon}>👤</Text>
+            </View>
+            <View style={styles.typeBadge}>
+              <Text style={styles.typeBadgeText}>{tipoLabel}</Text>
+            </View>
+          </View>
 
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarIcon}>👤</Text>
+          {/* Info card */}
+          <View style={styles.infoCard}>
+            {FIELDS.map((field, index) => (
+              <View key={field.label}>
+                <View style={styles.row}>
+                  <Text style={styles.rowLabel}>{field.label}</Text>
+                  <Text style={styles.rowValue} numberOfLines={1}>
+                    {field.value || "—"}
+                  </Text>
+                </View>
+                {index < FIELDS.length - 1 && <View style={styles.divider} />}
+              </View>
+            ))}
           </View>
-        </View>
 
-        <View style={styles.infoCard}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Nombres:</Text>
-            <Text style={styles.value}>{user?.nombre || "-"}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.label}>Apellidos:</Text>
-            <Text style={styles.value}>{user?.apellidos || "-"}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.label}>Email:</Text>
-            <Text style={styles.value}>{user?.email || "-"}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.label}>Departamento:</Text>
-            <Text style={styles.value}>{user?.departamento || "-"}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.label}>Ciudad:</Text>
-            <Text style={styles.value}>{user?.ciudad || "-"}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.label}>Direccion:</Text>
-            <Text style={styles.value}>{user?.direccion || "-"}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.label}>Perfil:</Text>
-            <Text style={styles.value}>
-              {user?.tipoUsuario
-                ? user.tipoUsuario.charAt(0).toUpperCase() + user.tipoUsuario.slice(1)
-                : "-"}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.passwordRow}>
-          <Text style={styles.passwordLabel}>Cambiar contraseña:</Text>
           <Pressable
-            style={styles.changeButton}
+            style={styles.actionButton}
+            onPress={() => navigation.navigate("Productos")}
+          >
+            <Text style={styles.actionButtonText}>🛒  Ir a Productos</Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.actionButton, styles.changePasswordButton]}
             onPress={() => setModalVisible(true)}
           >
-            <Text style={styles.changeButtonText}>Cambiar</Text>
+            <Text style={styles.actionButtonText}>🔑  Cambiar contraseña</Text>
           </Pressable>
-        </View>
 
-        <Text style={styles.copyright}>® CopyRight AgroApp</Text>
-      </ScrollView>
+          <Pressable
+            style={[styles.actionButton, styles.logoutButton]}
+            onPress={() => {
+              Alert.alert(
+                "Cerrar sesión",
+                "¿Seguro que deseas cerrar sesión?",
+                [
+                  { text: "Cancelar", style: "cancel" },
+                  {
+                    text: "Cerrar sesión",
+                    style: "destructive",
+                    onPress: () => {
+                      onLogout();
+                      navigation.replace("Login");
+                    },
+                  },
+                ]
+              );
+            }}
+          >
+            <Text style={styles.actionButtonText}>🚪  Cerrar sesión</Text>
+          </Pressable>
+
+          <Text style={styles.copyright}>® CopyRight AgroApp</Text>
+        </ScrollView>
+      </SafeAreaView>
 
       <Modal
         visible={modalVisible}
@@ -148,7 +168,7 @@ export default function ProfileScreen({ navigation, user }) {
             />
             <View style={styles.modalButtons}>
               <Pressable
-                style={[styles.modalBtn, { backgroundColor: "#7cd4d7" }]}
+                style={[styles.modalBtn, { backgroundColor: "#4caf50" }]}
                 onPress={handleChangePassword}
                 disabled={saving}
               >
@@ -157,7 +177,7 @@ export default function ProfileScreen({ navigation, user }) {
                 </Text>
               </Pressable>
               <Pressable
-                style={[styles.modalBtn, { backgroundColor: "#ccc" }]}
+                style={[styles.modalBtn, { backgroundColor: "#aaa" }]}
                 onPress={() => setModalVisible(false)}
               >
                 <Text style={styles.modalBtnText}>Cancelar</Text>
@@ -172,127 +192,143 @@ export default function ProfileScreen({ navigation, user }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  dimOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
   scroll: {
     flexGrow: 1,
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 30,
-  },
-  productsButton: {
-    backgroundColor: "#7cd4d7",
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 28,
-    alignSelf: "center",
-    marginBottom: 20,
-  },
-  productsButtonText: {
-    color: "#0f3f4f",
-    fontWeight: "700",
-    fontSize: 16,
-    textAlign: "center",
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   avatarContainer: {
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: 14,
   },
   avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#fff",
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "rgba(255,255,255,0.95)",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#7cd4d7",
+    borderWidth: 3,
+    borderColor: "#4caf50",
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 6,
+    elevation: 7,
   },
-  avatarIcon: {
-    fontSize: 56,
+  avatarIcon: { fontSize: 50 },
+  typeBadge: {
+    backgroundColor: "#4caf50",
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 4,
+  },
+  typeBadgeText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 13,
+    letterSpacing: 0.4,
   },
   infoCard: {
-    width: "100%",
-    backgroundColor: "rgba(210, 230, 245, 0.88)",
-    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.94)",
+    borderRadius: 16,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginBottom: 22,
+    paddingVertical: 2,
+    marginBottom: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
   },
   row: {
     flexDirection: "row",
-    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 9,
   },
-  label: {
+  rowLabel: {
+    fontSize: 12,
     fontWeight: "700",
-    fontSize: 13,
-    color: "#0f2030",
-    width: 120,
+    color: "#4caf50",
+    width: 105,
   },
-  value: {
+  rowValue: {
     fontSize: 13,
-    color: "#0f2030",
+    fontWeight: "500",
+    color: "#1a2e1a",
     flex: 1,
+    textAlign: "right",
   },
   divider: {
     height: 1,
-    backgroundColor: "rgba(150,180,200,0.4)",
+    backgroundColor: "rgba(0,0,0,0.07)",
   },
-  passwordRow: {
-    flexDirection: "row",
+  actionButton: {
+    height: 48,
+    borderRadius: 24,
+    justifyContent: "center",
     alignItems: "center",
-    gap: 14,
-    marginBottom: 18,
+    backgroundColor: "#4caf50",
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  passwordLabel: {
-    fontSize: 14,
-    color: "#0f2030",
-    fontWeight: "500",
-  },
-  changeButton: {
-    backgroundColor: "#7cd4d7",
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 22,
-  },
-  changeButtonText: {
-    color: "#0f3f4f",
+  changePasswordButton: { backgroundColor: "#7cd4d7" },
+  logoutButton: { backgroundColor: "#e05252", marginBottom: 20 },
+  actionButtonText: {
+    color: "#fff",
     fontWeight: "700",
     fontSize: 15,
+    letterSpacing: 0.3,
   },
   copyright: {
-    color: "#334",
+    color: "rgba(255,255,255,0.7)",
     fontSize: 11,
     textAlign: "center",
-    marginTop: 4,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalCard: {
-    width: "85%",
+    width: "88%",
     backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 20,
-    gap: 10,
+    borderRadius: 18,
+    padding: 24,
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 10,
   },
   modalTitle: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: "700",
-    color: "#0f3f4f",
+    color: "#1a2e1a",
     textAlign: "center",
     marginBottom: 4,
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: "#8bcfd2",
-    borderRadius: 8,
-    height: 40,
-    paddingHorizontal: 12,
-    fontSize: 13,
-    backgroundColor: "#f7fcfd",
+    borderColor: "#d0e8d0",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 52,
+    fontSize: 15,
+    backgroundColor: "#f6faf6",
   },
   modalButtons: {
     flexDirection: "row",
@@ -301,14 +337,14 @@ const styles = StyleSheet.create({
   },
   modalBtn: {
     flex: 1,
-    height: 38,
-    borderRadius: 19,
+    height: 48,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },
   modalBtnText: {
+    color: "#fff",
     fontWeight: "700",
-    fontSize: 13,
-    color: "#0f3f4f",
+    fontSize: 14,
   },
 });

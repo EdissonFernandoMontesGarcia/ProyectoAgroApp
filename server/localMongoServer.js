@@ -132,6 +132,32 @@ app.put("/api/users/password", async (req, res) => {
   }
 });
 
+// Recuperar contraseña (reset sin verificación de contraseña actual)
+app.post("/api/users/reset-password", async (req, res) => {
+  if (!usersCollection) {
+    return res.status(503).json({ message: "MongoDB no inicializado" });
+  }
+  const { email, newPassword } = req.body || {};
+  if (!email || !newPassword) {
+    return res.status(400).json({ message: "email y newPassword son obligatorios" });
+  }
+  try {
+    const user = await usersCollection.findOne({
+      email: String(email).trim().toLowerCase(),
+    });
+    if (!user) {
+      return res.status(404).json({ message: "No existe una cuenta con ese correo" });
+    }
+    await usersCollection.updateOne(
+      { email: String(email).trim().toLowerCase() },
+      { $set: { password: String(newPassword).trim() } }
+    );
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
 app.post("/api/products", async (req, res) => {
   if (!productsCollection) {
     return res.status(503).json({ message: "MongoDB no inicializado" });
