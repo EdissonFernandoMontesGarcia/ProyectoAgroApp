@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ProyectoAgroApp",
-    "slug": "ProyectoAgroApp",
+    "slug": "agroapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/IconoInicioAgroApp.png",
@@ -24,6 +24,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c6de3789-b5d2-4283-8ca0-783bb4cd2483"
+      }
+    },
+    "owner": "edissonmontes"
   }
 }
