@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/AgroAPP_Fondo_Pantalla.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.edissonmontes.agroapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
