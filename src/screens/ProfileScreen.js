@@ -48,92 +48,88 @@ export default function ProfileScreen({ navigation, user, onLogout }) {
     : "—";
 
   const FIELDS = [
-    { label: "Nombres",      value: user?.nombre },
-    { label: "Apellidos",    value: user?.apellidos },
-    { label: "Email",        value: user?.email },
-    { label: "Celular",      value: user?.celular },
-    { label: "Departamento", value: user?.departamento },
-    { label: "Ciudad",       value: user?.ciudad },
-    { label: "Dirección",    value: user?.direccion },
-    { label: "Perfil",       value: tipoLabel },
+    { label: "Nombres", icon: "👤", value: user?.nombre },
+    { label: "Apellidos", icon: "👥", value: user?.apellidos },
+    { label: "Email", icon: "✉️", value: user?.email },
+    { label: "Celular", icon: "📱", value: user?.celular },
+    { label: "Departamento", icon: "🗺️", value: user?.departamento },
+    { label: "Ciudad", icon: "🏙️", value: user?.ciudad },
+    { label: "Dirección", icon: "📍", value: user?.direccion },
   ];
 
   return (
     <ImageBackground
-      source={require("../../assets/Frutas_Fondo_Atardecer.png")}
+      source={require("../../assets/Huerta_Frutas.png")}
       style={styles.container}
       resizeMode="cover"
     >
       <View style={styles.dimOverlay} />
       <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Avatar */}
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarIcon}>👤</Text>
-            </View>
-            <View style={styles.typeBadge}>
-              <Text style={styles.typeBadgeText}>{tipoLabel}</Text>
-            </View>
-          </View>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-          {/* Info card */}
-          <View style={styles.infoCard}>
-            {FIELDS.map((field, index) => (
-              <View key={field.label}>
-                <View style={styles.row}>
-                  <Text style={styles.rowLabel}>{field.label}</Text>
-                  <Text style={styles.rowValue} numberOfLines={1}>
-                    {field.value || "—"}
-                  </Text>
-                </View>
-                {index < FIELDS.length - 1 && <View style={styles.divider} />}
+        {/* Avatar */}
+        <View style={styles.avatarContainer}>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarIcon}>👤</Text>
+          </View>
+          <View style={styles.typeBadge}>
+            <Text style={styles.typeBadgeText}>{tipoLabel}</Text>
+          </View>
+        </View>
+
+        {/* Info card */}
+        <View style={styles.infoCard}>
+          {FIELDS.map((field, index) => (
+            <View key={field.label}>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>{field.label}</Text>
+                <Text style={styles.rowValue}>{field.value || "—"}</Text>
               </View>
-            ))}
-          </View>
+              {index < FIELDS.length - 1 && <View style={styles.divider} />}
+            </View>
+          ))}
+        </View>
 
-          <Pressable
-            style={styles.actionButton}
-            onPress={() => navigation.navigate("Productos")}
-          >
-            <Text style={styles.actionButtonText}>🛒  Ir a Productos</Text>
-          </Pressable>
+        {/* Botones de acción */}
+        <Pressable
+          style={styles.actionButton}
+          onPress={() => navigation.navigate("Productos")}
+        >
+          <Text style={styles.actionButtonText}>🛒  Ir a Productos</Text>
+        </Pressable>
 
-          <Pressable
-            style={[styles.actionButton, styles.changePasswordButton]}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={styles.actionButtonText}>🔑  Cambiar contraseña</Text>
-          </Pressable>
+        <Pressable
+          style={[styles.actionButton, styles.changePasswordButton]}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.actionButtonText}>🔑  Cambiar contraseña</Text>
+        </Pressable>
 
-          <Pressable
-            style={[styles.actionButton, styles.logoutButton]}
-            onPress={() => {
-              Alert.alert(
-                "Cerrar sesión",
-                "¿Seguro que deseas cerrar sesión?",
-                [
-                  { text: "Cancelar", style: "cancel" },
-                  {
-                    text: "Cerrar sesión",
-                    style: "destructive",
-                    onPress: () => {
-                      onLogout();
-                      navigation.replace("Login");
-                    },
+        <Pressable
+          style={[styles.actionButton, styles.logoutButton]}
+          onPress={() => {
+            Alert.alert(
+              "Cerrar sesión",
+              "¿Seguro que deseas cerrar sesión?",
+              [
+                { text: "Cancelar", style: "cancel" },
+                {
+                  text: "Cerrar sesión",
+                  style: "destructive",
+                  onPress: () => {
+                    onLogout();
+                    navigation.replace("Login");
                   },
-                ]
-              );
-            }}
-          >
-            <Text style={styles.actionButtonText}>🚪  Cerrar sesión</Text>
-          </Pressable>
+                },
+              ]
+            );
+          }}
+        >
+          <Text style={styles.actionButtonText}>🚪  Cerrar sesión</Text>
+        </Pressable>
 
-          <Text style={styles.copyright}>® CopyRight AgroApp</Text>
-        </ScrollView>
+        <Text style={styles.copyright}>® CopyRight AgroApp</Text>
+      </ScrollView>
       </SafeAreaView>
 
       <Modal
@@ -194,15 +190,14 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   dimOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(0,0,0,0.32)",
   },
   scroll: {
     flexGrow: 1,
-    paddingHorizontal: 18,
-    paddingTop: 16,
+    paddingHorizontal: 16,
+    paddingTop: 14,
     paddingBottom: 16,
-  },
-  avatarContainer: {
+  },  avatarContainer: {
     alignItems: "center",
     marginBottom: 14,
   },
@@ -234,12 +229,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 13,
     letterSpacing: 0.4,
-  },
+  },  /* ── Info card ── */
   infoCard: {
-    backgroundColor: "rgba(255,255,255,0.94)",
+    backgroundColor: "rgba(255,255,255,0.93)",
     borderRadius: 16,
+    paddingVertical: 4,
     paddingHorizontal: 16,
-    paddingVertical: 2,
     marginBottom: 14,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
@@ -251,13 +246,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 9,
+    paddingVertical: 10,
   },
   rowLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "700",
     color: "#4caf50",
-    width: 105,
+    width: 110,
   },
   rowValue: {
     fontSize: 13,
@@ -270,6 +265,7 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "rgba(0,0,0,0.07)",
   },
+  /* ── Botones ── */
   actionButton: {
     height: 48,
     borderRadius: 24,
@@ -283,8 +279,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  changePasswordButton: { backgroundColor: "#7cd4d7" },
-  logoutButton: { backgroundColor: "#e05252", marginBottom: 20 },
+  changePasswordButton: {
+    backgroundColor: "#7cd4d7",
+  },
+  logoutButton: {
+    backgroundColor: "#e05252",
+    marginBottom: 20,
+  },
   actionButtonText: {
     color: "#fff",
     fontWeight: "700",
@@ -296,6 +297,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textAlign: "center",
   },
+  /* ── Modal ── */
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -348,3 +350,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
+
