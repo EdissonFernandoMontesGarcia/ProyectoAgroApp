@@ -8,7 +8,7 @@ Aplicacion basica de muestra para venta de productos del campo directo al consum
 - Expo
 - Navegacion con React Navigation
 - Variables de entorno con archivo `.env`
-- Persistencia de ordenes en MongoDB Data API (opcional, sin backend)
+- API Node.js separada para persistencia y operaciones sensibles
 
 ## Flujo incluido
 
@@ -27,35 +27,35 @@ npm start
 
 Luego abre en emulador o Expo Go.
 
-### API local para guardar usuarios en MongoDB local
+### Microservicio de AgroApp
 
-1. Instala dependencias:
+El backend ya no forma parte de la app Expo. Está en `microservico_AgroApp/` y tiene sus propias dependencias y variables privadas.
+
+1. Crea el archivo de configuración del backend:
 
 ```bash
+cp microservico_AgroApp/.env.example microservico_AgroApp/.env
+```
+
+2. Instala e inicia el microservicio:
+
+```bash
+cd microservico_AgroApp
 npm install
+npm run dev
 ```
 
-2. Asegurate de tener MongoDB local encendido (URI por defecto: `mongodb://localhost:27017`).
-
-3. Inicia la API local:
-
-```bash
-npm run server
-```
-
-4. En `.env` agrega la URL de tu API local para que el registro la use:
+3. En el `.env` de la app Expo configura la URL de la API:
 
 ```env
-EXPO_PUBLIC_LOCAL_API_BASE_URL=http://127.0.0.1:4000
+EXPO_PUBLIC_API_BASE_URL=http://192.168.1.10:4000
 ```
 
-Si usas dispositivo fisico, reemplaza `127.0.0.1` por la IP LAN de tu computador.
+Para un dispositivo físico usa la IP LAN de tu computador. En AWS usa la URL pública HTTPS del microservicio. Nunca agregues claves de MongoDB o Wompi con el prefijo `EXPO_PUBLIC_`.
 
 ## Configuracion de entorno
 
-Completa los valores en `.env`.
-
-Si no configuras MongoDB, la compra igual funciona y se guarda solo en memoria (modo demo).
+Completa los valores en `.env` (app) y `microservico_AgroApp/.env` (servidor).
 
 ## Colecciones sugeridas (MongoDB)
 
@@ -99,6 +99,4 @@ Si no configuras MongoDB, la compra igual funciona y se guarda solo en memoria (
 }
 ```
 
-## Nota importante
-
-Este ejemplo es academico y simple. En produccion, la pasarela de pago y MongoDB deben pasar por backend para proteger llaves y validar transacciones.
+Consulta [la guía de despliegue en EC2](microservico_AgroApp/DEPLOYMENT.md) para publicar el backend.

@@ -1,19 +1,31 @@
-require("dotenv").config({ path: require("path").join(__dirname, "..", ".env") });
+require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const { MongoClient, ObjectId } = require("mongodb");
 const crypto = require("crypto");
 
 const app = express();
-app.use(express.json());
+const allowedOrigins = (process.env.CORS_ORIGIN || "*")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
-const PORT = Number(process.env.LOCAL_API_PORT || 4000);
-const MONGO_URI = process.env.LOCAL_MONGO_URI || "mongodb://127.0.0.1:27017";
-const DB_NAME = process.env.LOCAL_MONGO_DB || "AgroApp";
-const USERS_COLLECTION = process.env.LOCAL_MONGO_USERS_COLLECTION || "usuarios";
+app.use(
+  cors({
+    origin: allowedOrigins.includes("*") ? "*" : allowedOrigins,
+  })
+);
+app.use(express.json({ limit: "1mb" }));
+
+const PORT = Number(process.env.PORT || 4000);
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017";
+const DB_NAME = process.env.MONGO_DB || "AgroApp";
+const USERS_COLLECTION = process.env.MONGO_USERS_COLLECTION || "usuarios";
 
 let usersCollection;
 let productsCollection;
 let ratingsCollection;
+let ordersCollection;
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "agroapp-local-mongo-api" });
@@ -296,20 +308,58 @@ app.get("/api/ratings", async (req, res) => {
   }
 });
 
+app.post("/api/orders", async (req, res) => {
+  if (!ordersCollection) {
+    return res.status(503).json({ message: "MongoDB no inicializado" });
+  }
+
+  const { usuario, productos, total, paymentMethod, status, createdAt } = req.body || {};
+  if (!usuario || !Array.isArray(productos) || !productos.length || !total) {
+    return res.status(400).json({ message: "usuario, productos y total son obligatorios" });
+  }
+
+  try {
+    const result = await ordersCollection.insertOne({
+      ...req.body,
+      usuario: { ...usuario, email: String(usuario.email || "").trim().toLowerCase() },
+      total: Number(total),
+      paymentMethod: String(paymentMethod || "").trim(),
+      status: String(status || "Pendiente").trim(),
+      createdAt: createdAt ? new Date(createdAt) : new Date(),
+    });
+    return res.status(201).json({ insertedId: result.insertedId.toString() });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
 async function start() {
   const client = new MongoClient(MONGO_URI);
   await client.connect();
+  mongoClient = client;
 
   const db = client.db(DB_NAME);
   usersCollection = db.collection(USERS_COLLECTION);
   productsCollection = db.collection("productos");
   ratingsCollection = db.collection("calificaciones");
+  ordersCollection = db.collection(process.env.MONGO_ORDERS_COLLECTION || "ordenes");
 
   app.listen(PORT, () => {
-    console.log(`Local Mongo API en http://localhost:${PORT}`);
-    console.log(`Mongo conectado: ${MONGO_URI}/${DB_NAME}.${USERS_COLLECTION}`);
+    console.log(`AgroApp API en http://localhost:${PORT}`);
+    console.log(`MongoDB conectado: ${DB_NAME}.${USERS_COLLECTION}`);
   });
 }
+
+let mongoClient;
+
+async function stop(signal) {
+  console.log(`${signal} recibido. Cerrando API...`);
+  await mongoClient?.close();
+  process.exit(0);
+}
+
+process.on("SIGINT", () => stop("SIGINT"));
+process.on("SIGTERM", () => stop("SIGTERM"));
 
 start().catch((error) => {
   console.error("No se pudo iniciar el servidor local:", error.message);

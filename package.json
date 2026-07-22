@@ -7,17 +7,15 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "server": "node server/localMongoServer.js"
+    "backend:start": "npm --prefix microservico_AgroApp start",
+    "backend:dev": "npm --prefix microservico_AgroApp run dev"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
     "@react-navigation/native": "^7.2.2",
     "@react-navigation/native-stack": "^7.14.12",
-    "dotenv": "^17.4.2",
     "expo": "~54.0.33",
     "expo-status-bar": "~3.0.9",
-    "express": "^4.21.2",
-    "mongodb": "^6.17.0",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-safe-area-context": "~5.6.0",
