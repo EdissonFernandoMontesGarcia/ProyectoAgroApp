@@ -29,18 +29,18 @@ Luego abre en emulador o Expo Go.
 
 ### Microservicio de AgroApp
 
-El backend ya no forma parte de la app Expo. Está en `microservico_AgroApp/` y tiene sus propias dependencias y variables privadas.
+El backend es un proyecto independiente en `../microservico_AgroApp/` (la carpeta `Documentos/microservico_AgroApp`). Tiene sus propias dependencias y variables privadas.
 
 1. Crea el archivo de configuración del backend:
 
 ```bash
-cp microservico_AgroApp/.env.example microservico_AgroApp/.env
+cp ../microservico_AgroApp/.env.example ../microservico_AgroApp/.env
 ```
 
 2. Instala e inicia el microservicio:
 
 ```bash
-cd microservico_AgroApp
+cd ../microservico_AgroApp
 npm install
 npm run dev
 ```
@@ -55,7 +55,7 @@ Para un dispositivo físico usa la IP LAN de tu computador. En AWS usa la URL p�
 
 ## Configuracion de entorno
 
-Completa los valores en `.env` (app) y `microservico_AgroApp/.env` (servidor).
+Completa los valores en `.env` (app) y `../microservico_AgroApp/.env` (servidor).
 
 ## Colecciones sugeridas (MongoDB)
 
@@ -99,4 +99,4 @@ Completa los valores en `.env` (app) y `microservico_AgroApp/.env` (servidor).
 }
 ```
 
-Consulta [la guía de despliegue en EC2](microservico_AgroApp/DEPLOYMENT.md) para publicar el backend.
+Consulta la guía `DEPLOYMENT.md` dentro de `../microservico_AgroApp/` para publicar el backend.

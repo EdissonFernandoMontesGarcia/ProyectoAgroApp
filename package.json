@@ -6,9 +6,7 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
-    "backend:start": "npm --prefix microservico_AgroApp start",
-    "backend:dev": "npm --prefix microservico_AgroApp run dev"
+    "web": "expo start --web"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

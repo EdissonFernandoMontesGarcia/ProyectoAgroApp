@@ -5,6 +5,22 @@ function normalizeApiBaseUrl(url) {
   return url.replace(/\/$/, "");
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("La API no respondió en 10 segundos");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function saveUserToApi(user) {
   const baseUrl = normalizeApiBaseUrl(ENV.API_BASE_URL);
   if (!baseUrl) {
@@ -152,7 +168,7 @@ export async function loginFromMongo(email, password) {
   }
 
   try {
-    const response = await fetch(`${baseUrl}/api/users/login`, {
+    const response = await fetchWithTimeout(`${baseUrl}/api/users/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
