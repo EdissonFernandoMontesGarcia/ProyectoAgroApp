@@ -21,6 +21,17 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
   }
 }
 
+async function readJsonResponse(response) {
+  const text = await response.text();
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(
+      `La API devolvio una respuesta no JSON (HTTP ${response.status})`
+    );
+  }
+}
+
 async function saveUserToApi(user) {
   const baseUrl = normalizeApiBaseUrl(ENV.API_BASE_URL);
   if (!baseUrl) {
@@ -41,7 +52,7 @@ async function saveUserToApi(user) {
       return { saved: false, reason: `HTTP ${response.status}: ${text}` };
     }
 
-    const data = await response.json();
+    const data = await readJsonResponse(response);
     return { saved: Boolean(data.insertedId), insertedId: data.insertedId || null };
   } catch (error) {
     return { saved: false, reason: error.message };
@@ -177,7 +188,7 @@ export async function loginFromMongo(email, password) {
       }),
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response);
 
     if (!response.ok) {
       return { ok: false, reason: data.message || "Error al iniciar sesión" };
