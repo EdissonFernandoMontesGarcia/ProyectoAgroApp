@@ -1,4 +1,4 @@
-import { ENV } from "../config/env";
+import { ENV } from "../config/config";
 
 function normalizeApiBaseUrl(url) {
   if (!url) return "";

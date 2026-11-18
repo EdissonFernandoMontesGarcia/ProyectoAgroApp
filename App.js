@@ -15,7 +15,7 @@ import RatingScreen from "./src/screens/RatingScreen";
 import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
 import { products } from "./src/data/products";
 import { mockUser } from "./src/data/mockUser";
-import { ENV } from "./src/config/env";
+import { ENV } from "./src/config/config";
 import { saveOrderToMongo, saveUserToMongo, loginFromMongo, saveProductToMongo } from "./src/services/mongoService";
 
 const Stack = createNativeStackNavigator();

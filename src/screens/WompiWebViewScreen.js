@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
-import { ENV } from "../config/env";
+import { ENV } from "../config/config";
 import { getWompiSignature, verifyWompiTransaction } from "../services/mongoService";
 
 function buildWompiCheckoutUrl({
